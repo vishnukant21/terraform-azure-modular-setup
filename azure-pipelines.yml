@@ -15,7 +15,7 @@ steps:
     command: 'init'
     workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
     backendServiceArm: 'myconnection'
-    backendAzureRmResourceGroupName: 'rg-vishnu'
+    backendAzureRmResourceGroupName: 'rg-vishnu001'
     backendAzureRmStorageAccountName: 'stgvishnu'
     backendAzureRmContainerName: 'contvishnu'
     backendAzureRmKey: 'terraform.tfstate'
