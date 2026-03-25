@@ -13,7 +13,7 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'init'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
     backendServiceArm: 'myconnection'
     backendAzureRmResourceGroupName: 'gss-rg'
     backendAzureRmStorageAccountName: 'gssstg'
@@ -23,12 +23,12 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'plan'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
     environmentServiceNameAzureRM: 'myconnection'
 - task: TerraformTask@5
   inputs:
     provider: 'azurerm'
     command: 'apply'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
     commandOptions: '-auto-approve'
     environmentServiceNameAzureRM: 'myconnection'
