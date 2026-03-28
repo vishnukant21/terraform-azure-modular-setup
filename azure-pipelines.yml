@@ -27,21 +27,69 @@ stages:
             backendAzureRmContainerName: 'gsscont'
             backendAzureRmKey: 'terraform.tfstate'
 
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: 'Invoke-WebRequest https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.ps1 -OutFile install.ps1.\install.ps1'
+        # - task: PowerShell@2
+        #   inputs:
+        #     targetType: 'inline'
+        #     script: 'Invoke-WebRequest https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.ps1 -OutFile install.ps1.\install.ps1'
 
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |
-              infracost configure set api_key $(INFRACOST_API_KEY)
-                  infracost breakdown --path tfplan.binary --format table
+        # - task: PowerShell@2
+        #   inputs:
+        #     targetType: 'inline'
+        #     script: |
+        #       infracost configure set api_key $(INFRACOST_API_KEY)
+        #           infracost breakdown --path tfplan.binary --format table
         
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
             command: 'plan'
             workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
+            environmentServiceNameAzureRM: 'myconnection'
+          
+  - stage: securityscanning
+    displayName: Security Scanning
+    jobs:
+      - job: securityscanning
+        displayName: Security Scanning
+        steps:
+        - task: tfsec@1
+          inputs:
+            version: 'v1.26.0'
+            dir: '$(System.DefaultWorkingDirectory)'
+        
+  - stage: manualapprover
+    displayName: Manual Approver
+    jobs:
+      - job: manualapprover
+        displayName: Manual Approver
+        pool: server
+        steps:
+        - task: ManualValidation@1
+          inputs:
+            notifyUsers: 'vishnukantmishra21072002@gmail.com'
+            approvers: 'vishnukantmishra21072002@gmail.com'
+
+  - stage: initapply
+    displayName: Init & Apply
+    jobs:
+      - job: initandapply
+        displayName: Init & Apply
+        steps:
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
+            backendServiceArm: 'myconnection'
+            backendAzureRmResourceGroupName: 'gss-rg'
+            backendAzureRmStorageAccountName: 'gssstg'
+            backendAzureRmContainerName: 'gsscont'
+            backendAzureRmKey: 'terraform.tfstate'
+        
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
+            commandOptions: '-auto-approve'
             environmentServiceNameAzureRM: 'myconnection'
