@@ -3,32 +3,45 @@ trigger:
     include:
       - main
 
-pool: appagent
+pool: appagent  # Pool name define
 
-steps:
-- task: TerraformInstaller@1
-  inputs:
-    terraformVersion: '1.14.7'
-- task: TerraformTask@5
-  inputs:
-    provider: 'azurerm'
-    command: 'init'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
-    backendServiceArm: 'myconnection'
-    backendAzureRmResourceGroupName: 'gss-rg'
-    backendAzureRmStorageAccountName: 'gssstg'
-    backendAzureRmContainerName: 'gsscont'
-    backendAzureRmKey: 'terraform.tfstate'
-- task: TerraformTask@5
-  inputs:
-    provider: 'azurerm'
-    command: 'plan'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
-    environmentServiceNameAzureRM: 'myconnection'
-- task: TerraformTask@5
-  inputs:
-    provider: 'azurerm'
-    command: 'apply'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
-    commandOptions: '-auto-approve'
-    environmentServiceNameAzureRM: 'myconnection'
+stages:
+  - stage: initplan
+    displayName: Init & Plan
+    jobs:
+      - job: initplan
+        displayName: Init & Plan
+
+        steps:
+        - task: TerraformInstaller@1
+          inputs:
+            terraformVersion: '1.14.7'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
+            backendServiceArm: 'myconnection'
+            backendAzureRmResourceGroupName: 'gss-rg'
+            backendAzureRmStorageAccountName: 'gssstg'
+            backendAzureRmContainerName: 'gsscont'
+            backendAzureRmKey: 'terraform.tfstate'
+
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: 'Invoke-WebRequest https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.ps1 -OutFile install.ps1.\install.ps1'
+
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              infracost configure set api_key $(INFRACOST_API_KEY)
+                  infracost breakdown --path tfplan.binary --format table
+        
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Environments/dev'
+            environmentServiceNameAzureRM: 'myconnection'
