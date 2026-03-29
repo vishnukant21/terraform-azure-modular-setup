@@ -41,15 +41,6 @@ stages:
         #           infracost breakdown --path tfplan.binary --format table
 
 
-        - task: PowerShell@2
-          displayName: Tflint Scanning
-          inputs:
-            targetType: 'inline'
-            script: |
-              Invoke-WebRequest https://github.com/terraform-linters/tflint/releases/latest/download/tflint_windows_amd64.zip -OutFile tflint.zip
-              Expand-Archive tflint.zip -DestinationPath tflint
-              .\tflint\tflint.exe --init
-              .\tflint\tflint.exe
         - task: TerraformTask@5
           displayName: Terraform Plan
           inputs:
@@ -68,6 +59,16 @@ stages:
           inputs:
             version: 'v1.26.0'
             dir: '$(System.DefaultWorkingDirectory)'
+
+        - task: PowerShell@2
+          displayName: Tflint Security linter
+          inputs:
+            targetType: 'inline'
+            script: |
+              Invoke-WebRequest https://github.com/terraform-linters/tflint/releases/latest/download/tflint_windows_amd64.zip -OutFile tflint.zip
+              Expand-Archive tflint.zip -DestinationPath tflint
+              .\tflint\tflint.exe --init
+              .\tflint\tflint.exe
         
   - stage: manualapprover
     displayName: Manual Approver
