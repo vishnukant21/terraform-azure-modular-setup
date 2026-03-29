@@ -75,9 +75,10 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              Invoke-WebRequest https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_windows-64bit.zip -OutFile trivy.zip
+              $url = "https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_windows-64bit.zip"
+              Invoke-WebRequest $url -OutFile trivy.zip
               Expand-Archive trivy.zip -DestinationPath trivy
-              .\trivy\trivy.exe config .
+              .\trivy\trivy.exe config . --exit-code 1 --severity HIGH,CRITICAL
         
   - stage: manualapprover
     displayName: Manual Approver
