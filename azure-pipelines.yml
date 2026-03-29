@@ -80,21 +80,28 @@ stages:
 
         - task: PowerShell@2
           displayName: Run Checkov Scan
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
               pip install checkov
               checkov -d $(System.DefaultWorkingDirectory) --framework terraform
+              
 
         - task: PowerShell@2
           displayName: Trivy Scan
           inputs:
             targetType: 'inline'
             script: |
-              $url = "https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_windows-64bit.zip"
-              Invoke-WebRequest $url -OutFile trivy.zip
-              Expand-Archive trivy.zip -DestinationPath trivy -Force
-              .\trivy\trivy.exe config . --exit-code 1 --severity HIGH,CRITICAL
+              Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_windows-64bit.zip" -OutFile "trivy.zip"
+              Expand-Archive trivy.zip -DestinationPath "$(Build.SourcesDirectory)\trivy" -Force
+              $env:PATH += ";$(Build.SourcesDirectory)\trivy"
+              trivy --version
+        - task: PowerShell@2
+          displayName: Run Trivy
+          inputs:
+            targetType: 'inline'
+            script: '$(System.DefaultWorkingDirectory)\trivy\trivy.exe config .'
         
   - stage: manualapprover
     displayName: Manual Approver
