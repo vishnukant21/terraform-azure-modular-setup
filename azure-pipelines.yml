@@ -59,10 +59,11 @@ stages:
             dir: '$(System.DefaultWorkingDirectory)/Environments/dev'
 
         - task: PowerShell@2
+          displayName: Stylelint
           inputs:
             targetType: 'inline'
             script: |
-              Set-Location $(System.DefaultWorkingDirectory)/Environments/dev
+              Set-Location $(System.DefaultWorkingDirectory)
               npm install
               npx stylelint "**/*.css" "**/*.scss" --formatter json > stylelint-report.json
 
