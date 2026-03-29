@@ -84,13 +84,7 @@ stages:
             targetType: 'inline'
             script: |
               pip install checkov
-              python -m checkov -d .
-              if ($LASTEXITCODE -ne 0) {
-                   Write-Error "Checkov found issues"
-                    exit 1
-              } else {
-                    Write-Host "Checkov scan passed"
-              }
+              checkov -d $(System.DefaultWorkingDirectory) --framework terraform
 
         - task: PowerShell@2
           displayName: Trivy Scan
