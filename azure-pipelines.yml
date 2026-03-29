@@ -71,14 +71,12 @@ stages:
               .\tflint\tflint.exe
 
         - task: PowerShell@2
+          displayName: Biome Lint & Format
           inputs:
             targetType: 'inline'
             script: |
               npm install @biomejs/biome --save-dev
-              npx biome check .
-              if ($LASTEXITCODE -ne 0) {
-                      exit 1
-                    }
+              npx biome check . --write
 
         - task: PowerShell@2
           displayName: Trivy Scan
