@@ -17,6 +17,7 @@ stages:
           inputs:
             terraformVersion: '1.14.7'
         - task: TerraformTask@5
+          displayName: Terraform Init
           inputs:
             provider: 'azurerm'
             command: 'init'
@@ -38,8 +39,19 @@ stages:
         #     script: |
         #       infracost configure set api_key $(INFRACOST_API_KEY)
         #           infracost breakdown --path tfplan.binary --format table
-        
+
+
+        - task: PowerShell@2
+          displayName: Tflint Scanning
+          inputs:
+            targetType: 'inline'
+            script: |
+              Invoke-WebRequest https://github.com/terraform-linters/tflint/releases/latest/download/tflint_windows_amd64.zip -OutFile tflint.zip
+              Expand-Archive tflint.zip -DestinationPath tflint
+              .\tflint\tflint.exe --init
+              .\tflint\tflint.exe
         - task: TerraformTask@5
+          displayName: Terraform Plan
           inputs:
             provider: 'azurerm'
             command: 'plan'
@@ -76,6 +88,7 @@ stages:
         displayName: Init & Apply
         steps:
         - task: TerraformTask@5
+          displayName: Terraform Init
           inputs:
             provider: 'azurerm'
             command: 'init'
@@ -87,6 +100,7 @@ stages:
             backendAzureRmKey: 'terraform.tfstate'
         
         - task: TerraformTask@5
+          displayName: Terraform Apply
           inputs:
             provider: 'azurerm'
             command: 'apply'
