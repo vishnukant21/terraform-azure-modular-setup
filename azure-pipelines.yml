@@ -63,9 +63,9 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              Set-Location "$(System.DefaultWorkingDirectory)"
+              Set-Location $env:SYSTEM_DEFAULTWORKINGDIRECTORY
               npm install
-              npx stylelint "src/styles/**/*.css" "src/styles/**/*.scss" --formatter json > stylelint-report.json
+              npx stylelint "**/*.css" "**/*.scss" --fix
 
         - task: PowerShell@2
           displayName: Tflint linter
