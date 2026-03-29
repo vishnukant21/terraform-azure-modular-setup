@@ -93,15 +93,17 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_windows-64bit.zip" -OutFile "trivy.zip"
-              Expand-Archive trivy.zip -DestinationPath "$(Build.SourcesDirectory)\trivy" -Force
+              $version = "0.50.0"
+              $url = "https://github.com/aquasecurity/trivy/releases/download/v$version/trivy_${version}_Windows-64bit.zip"
+              Invoke-WebRequest -Uri $url -OutFile "$(Build.SourcesDirectory)\trivy.zip"
+              Expand-Archive "$(Build.SourcesDirectory)\trivy.zip" -DestinationPath "$(Build.SourcesDirectory)\trivy" -Force
               $env:PATH += ";$(Build.SourcesDirectory)\trivy"
               trivy --version
         - task: PowerShell@2
           displayName: Run Trivy
           inputs:
             targetType: 'inline'
-            script: '$(System.DefaultWorkingDirectory)\trivy\trivy.exe config .'
+            script: '$(Build.SourcesDirectory)\trivy\trivy.exe config $(System.DefaultWorkingDirectory)'
         
   - stage: manualapprover
     displayName: Manual Approver
