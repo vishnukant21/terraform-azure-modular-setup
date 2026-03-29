@@ -61,7 +61,7 @@ stages:
             dir: '$(System.DefaultWorkingDirectory)'
 
         - task: PowerShell@2
-          displayName: Tflint Security linter
+          displayName: Tflint linter
           inputs:
             targetType: 'inline'
             script: |
@@ -69,6 +69,15 @@ stages:
               Expand-Archive tflint.zip -DestinationPath tflint
               .\tflint\tflint.exe --init
               .\tflint\tflint.exe
+
+        - task: PowerShell@2
+          displayName: Trivy Terraform Scan
+          inputs:
+            targetType: 'inline'
+            script: |
+              Invoke-WebRequest https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_windows-64bit.zip -OutFile trivy.zip
+              Expand-Archive trivy.zip -DestinationPath trivy
+              .\trivy\trivy.exe config .
         
   - stage: manualapprover
     displayName: Manual Approver
