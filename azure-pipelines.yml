@@ -56,7 +56,15 @@ stages:
         - task: tfsec@1
           inputs:
             version: 'v1.26.0'
-            dir: '$(System.DefaultWorkingDirectory)'
+            dir: '$(System.DefaultWorkingDirectory)/Environments/dev'
+
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              Set-Location $(System.DefaultWorkingDirectory)/Environments/dev
+              npm install
+              npx stylelint "**/*.css" "**/*.scss" --formatter json > stylelint-report.json
 
         - task: PowerShell@2
           displayName: Tflint linter
