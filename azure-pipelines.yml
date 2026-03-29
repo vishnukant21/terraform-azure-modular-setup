@@ -29,11 +29,14 @@ stages:
             backendAzureRmKey: 'terraform.tfstate'
 
         - task: PowerShell@2
+          displayName: Infracost 
           inputs:
             targetType: 'inline'
             script: |
-              'infracost breakdown --path=.'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+              Invoke-WebRequest -Uri "https://github.com/infracost/infracost/releases/latest/download/infracost-windows-amd64.zip" -OutFile "infracost.zip"
+              Expand-Archive infracost.zip -DestinationPath "$env:BUILD_SOURCESDIRECTORY\infracost" -Force
+              $env:Path += ";$env:BUILD_SOURCESDIRECTORY\infracost"
+              infracost breakdown --path="$(System.DefaultWorkingDirectory)/Environments/dev" --format=table
 
 
         - task: TerraformTask@5
