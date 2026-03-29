@@ -28,17 +28,12 @@ stages:
             backendAzureRmContainerName: 'gsscont'
             backendAzureRmKey: 'terraform.tfstate'
 
-        # - task: PowerShell@2
-        #   inputs:
-        #     targetType: 'inline'
-        #     script: 'Invoke-WebRequest https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.ps1 -OutFile install.ps1.\install.ps1'
-
-        # - task: PowerShell@2
-        #   inputs:
-        #     targetType: 'inline'
-        #     script: |
-        #       infracost configure set api_key $(INFRACOST_API_KEY)
-        #           infracost breakdown --path tfplan.binary --format table
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              'infracost breakdown --path=.'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
 
 
         - task: TerraformTask@5
